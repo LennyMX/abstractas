@@ -31,19 +31,29 @@ public class SistemaMensajes {
     }
 
     // metodo para buscar mensajes por remitente
-    public HashMap<String, List<String>> buscarMensajesPorRemitente(String remitente) {
-        HashMap<String, List<String>> resultado = new HashMap<>();
-        List<String> mensajes = misMensajes.stream()
-                .filter(mensaje -> mensaje.getEmisor().equals(remitente))
-                .map(Mensaje::toString)
-                .collect(Collectors.toList());
-
-        if (!mensajes.isEmpty()) {
-            resultado.put(remitente, mensajes);
-        }
-
-        return resultado;
+public HashMap<String, List<String>> buscarMensajesPorRemitente(String remitente) {
+    HashMap<String, List<String>> resultado = new HashMap<>();
+    List<String> mensajes = misMensajes.stream()
+            .filter(mensaje -> mensaje.getEmisor().equals(remitente))
+            .map(Mensaje::toString)
+            .collect(Collectors.toList());
+    
+    if (!mensajes.isEmpty()) {
+        resultado.put(remitente, mensajes);
     }
+    
+    // Imprimir los mensajes en el formato (nombreRemitente, mensaje)
+    if (!resultado.isEmpty()) {
+        System.out.println("Mensajes de " + remitente + ":");
+        for (String mensaje : mensajes) {
+            System.out.println("(" + remitente + ", " + mensaje + ")");
+        }
+    } else {
+        System.out.println("No se encontraron mensajes del remitente: " + remitente);
+    }
+    
+    return resultado;
+}
 
     // metodo para buscar un mensaje por tipo texto o fax
     public ArrayList<Mensaje> buscarMensajesPorTipo(Class<?> tipoMensaje) {
