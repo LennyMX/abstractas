@@ -1,0 +1,167 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Scanner;
+import java.util.stream.Collectors;
+
+public class SistemaMensajes {
+    private ArrayList<Mensaje> misMensajes;
+
+    public SistemaMensajes() {
+        misMensajes = new ArrayList<>();
+    }
+
+    // metodo para guardar un mensaje
+    public void insertarMensaje(Mensaje mensaje) {
+        misMensajes.add(mensaje);
+    }
+
+    // metodo para imprimir todos los mensajes 
+    public void reproducirTodosMisMensajes() {
+        for (Mensaje miMensaje : misMensajes) {
+            System.out.println(miMensaje.toString());
+            miMensaje.reproducir();
+        }
+    }
+
+    // metodo para borrar todos los mensajes de un remitente
+    public void borrarMensajesPorRemitente(String remitente) {
+        misMensajes.removeIf(mensaje -> mensaje.getEmisor().equals(remitente));
+        System.out.println("Mensajes de " + remitente + " borrados.");
+    }
+
+    // metodo para buscar mensajes por remitente
+    public HashMap<String, List<String>> buscarMensajesPorRemitente(String remitente) {
+        HashMap<String, List<String>> resultado = new HashMap<>();
+        List<String> mensajes = misMensajes.stream()
+                .filter(mensaje -> mensaje.getEmisor().equals(remitente))
+                .map(Mensaje::toString)
+                .collect(Collectors.toList());
+
+        if (!mensajes.isEmpty()) {
+            resultado.put(remitente, mensajes);
+        }
+
+        return resultado;
+    }
+
+    // metodo para buscar un mensaje por tipo texto o fax
+    public ArrayList<Mensaje> buscarMensajesPorTipo(Class<?> tipoMensaje) {
+        return misMensajes.stream()
+                .filter(tipoMensaje::isInstance)
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    // metodo para ordenar los mensajes
+    public void ordenarMensajesPorRemitente() {
+        misMensajes.sort((m1, m2) -> m1.getEmisor().compareTo(m2.getEmisor()));
+        System.out.println("Mensajes ordenados por remitente.");
+    }
+
+    // metodo para reproducir un mensaje por indice
+    public void reproducirMensajePorIndice(int indice) {
+        if (indice >= 0 && indice < misMensajes.size()) {
+            misMensajes.get(indice).reproducir();
+        } else {
+            System.out.println("Índice fuera de rango.");
+        }
+    }
+
+    // main y menu de opciones
+    public static void main(String[] args) {
+        SistemaMensajes sistema = new SistemaMensajes();
+        Scanner input = new Scanner(System.in);
+        int op = 0;
+
+        System.out.println("Bienvenido al super sistema de mensajes.");
+
+        do {
+            System.out.println("\nSeleccione una opción:");
+            System.out.println("1. Insertar mensajes.");
+            System.out.println("2. Leer todos los mensajes.");
+            System.out.println("3. Borrar los mensajes de un remitente.");
+            System.out.println("4. Ver todos los mensajes de un remitente.");
+            System.out.println("5. Ver todos los mensajes de un tipo (Texto, Fax o Audio).");
+            System.out.println("6. Ordenar los mensajes por remitente.");
+            System.out.println("7. Reproducir un mensaje en particular con el índice.");
+            System.out.println("8. Salir.");
+
+            try {
+                op = Integer.parseInt(input.nextLine());
+
+                switch (op) {
+                    case 1:
+                        System.out.println("Ingrese el tipo de mensaje (1. Texto, 2. Fax): ");
+                        int tipo = Integer.parseInt(input.nextLine());
+
+                        System.out.print("Ingrese el destinatario: ");
+                        String destinatario = input.nextLine();
+
+                        System.out.print("Ingrese el emisor: ");
+                        String emisor = input.nextLine();
+
+                        if (tipo == 1) {
+                            System.out.print("Ingrese el texto del mensaje: ");
+                            String texto = input.nextLine();
+                            sistema.insertarMensaje(new MensajeTexto(destinatario, emisor, texto));
+                        } else if (tipo == 2) {
+                            System.out.print("Ingrese el nombre del archivo: ");
+                            String nombreArchivo = input.nextLine();
+                            sistema.insertarMensaje(new MensajeFax(destinatario, emisor, nombreArchivo));
+                        } else {
+                            System.out.println("Tipo de mensaje no válido.");
+                        }
+                        break;
+
+                    case 2:
+                        sistema.reproducirTodosMisMensajes();
+                        break;
+
+                    case 3:
+                        System.out.print("Ingrese el remitente cuyos mensajes desea borrar: ");
+                        String remitenteBorrar = input.nextLine();
+                        sistema.borrarMensajesPorRemitente(remitenteBorrar);
+                        break;
+
+                    case 4:
+                        System.out.print("Ingrese el remitente cuyos mensajes desea ver: ");
+                        String remitenteVer = input.nextLine();
+                        System.out.println(sistema.buscarMensajesPorRemitente(remitenteVer));
+                        break;
+
+                    case 5:
+                        System.out.println("Seleccione el tipo de mensaje a ver (1. Texto, 2. Fax): ");
+                        int tipoMensaje = Integer.parseInt(input.nextLine());
+                        ArrayList<Mensaje> mensajesPorTipo = tipoMensaje == 1
+                                ? sistema.buscarMensajesPorTipo(MensajeTexto.class)
+                                : sistema.buscarMensajesPorTipo(MensajeFax.class);
+
+                        mensajesPorTipo.forEach(System.out::println);
+                        break;
+
+                    case 6:
+                        sistema.ordenarMensajesPorRemitente();
+                        break;
+
+                    case 7:
+                        System.out.print("Ingrese el índice del mensaje que desea reproducir: ");
+                        int indice = Integer.parseInt(input.nextLine());
+                        sistema.reproducirMensajePorIndice(indice);
+                        break;
+
+                    case 8:
+                        System.out.println("Saliendo del sistema...");
+                        break;
+
+                    default:
+                        System.out.println("Opción no válida. Intente nuevamente.");
+                        break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Por favor, ingrese un número válido.");
+            }
+        } while (op != 8);
+
+        input.close();
+    }
+}
