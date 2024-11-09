@@ -1,0 +1,38 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class MensajeFax extends Mensaje {
+    private String nombreArchivo;
+
+    public MensajeFax(String destinatario, String emisor, String nombreArchivo) {
+        super(destinatario, emisor);
+        this.nombreArchivo = nombreArchivo;
+    }
+
+    /**
+     * Metodo para reproducir el fax, en este caso se manda a la impresora.
+     */
+    @Override
+    public void reproducir() {
+        System.out.println("Reproduciendo el fax de: " + emisor + " a " + destinatario);
+        System.out.println("Contenido del archivo " + nombreArchivo + ":");
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(nombreArchivo))) {
+            String linea;
+            while ((linea = reader.readLine()) != null) {
+                System.out.println(linea);
+            }
+        } catch (IOException e) {
+            System.out.println("Error al leer el archivo: " + e.getMessage());
+        }
+    }
+
+    public String getNombreArchivo() {
+        return nombreArchivo;
+    }
+
+    public void setNombreArchivo(String nombreArchivo) {
+        this.nombreArchivo = nombreArchivo;
+    }
+}
